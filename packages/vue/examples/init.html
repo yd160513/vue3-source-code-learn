@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+
+<body>
+  <div id="app">
+    <h1>{{data.a}}</h1>
+  </div>
+
+  <script src="../dist/vue.global.js"></script>
+  <script>
+    const { ref, watch, watchEffect, createApp, reactive } = Vue
+
+    debugger
+
+    // {_rawValue: 0, _shallow: false, __v_isRef: true, _value: 0, value: 0}
+    // const refVal = ref(0)
+    // {_rawValue: {a: 1, b: 2 }, _shallow: false, __v_isRef: true, _value: {a:1, b: 2}, value: proxy}
+    const refObj = ref({
+      a: 1,
+      b: 2
+    })
+
+    console.log(refObj.value.a)
+    refObj.value = 321
+
+    // const data = reactive({
+    //   a: 1,
+    //   b: 2,
+    //   count: 0
+    // })
+
+    // const arr = [1, 2]
+
+    // watch((event) => {
+    //   debugger
+    //   return data.a
+    // }, (newVal, oldVale) => {
+    //   debugger
+    // })
+
+    // setTimeout(() => {
+    //   data.a = 6
+    // }, 5000)
+
+    // data.a = 2
+    // console.log(data.a)
+
+    // 收集依赖 track()
+    // watchEffect(() => {
+    //   /**
+    //    * data.a // getter
+    //    * data.count = // setter trigger()
+    //    **/
+    //   data.count = data.a + 1
+    //   console.log('count: ', data.count)
+    // })
+    
+    // watchEffect(() => {
+    //   const count2 = data.count + 1
+    //   console.log('count2: ', count2)
+    // })
+
+    // setTimeout(() => {
+    //   data.count = data.count + data.count
+    // }, 0)
+
+    // vue2: new Vue()
+    // vue3: createApp
+    // createApp({
+    //   data
+    // }).mount('#app')
+  </script>
+</body>
+
+</html>
