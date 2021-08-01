@@ -341,7 +341,6 @@ const [
 ] = /* #__PURE__*/ createInstrumentations()
 
 function createInstrumentationGetter(isReadonly: boolean, shallow: boolean) {
-  debugger
   const instrumentations = shallow
     ? isReadonly
       ? shallowReadonlyInstrumentations

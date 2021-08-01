@@ -34,6 +34,7 @@ class ComputedRefImpl<T> {
     private readonly _setter: ComputedSetter<T>,
     isReadonly: boolean
   ) {
+    // 这里传入的 lazy 为 true，则是惰性加载
     this.effect = effect(getter, {
       lazy: true,
       scheduler: () => {
@@ -73,6 +74,10 @@ export function computed<T>(
   let getter: ComputedGetter<T>
   let setter: ComputedSetter<T>
 
+  /**
+   * 调用 computed 的参数为函数
+   * 如果是参数是函数的话，将不能进行 set
+   */
   if (isFunction(getterOrOptions)) {
     getter = getterOrOptions
     setter = __DEV__
@@ -80,11 +85,16 @@ export function computed<T>(
           console.warn('Write operation failed: computed value is readonly')
         }
       : NOOP
-  } else {
+  } 
+  // 调用 computed 的参数为 handler
+  else {
     getter = getterOrOptions.get
     setter = getterOrOptions.set
   }
 
+  /**
+   * 第三个参数为是否只读，function 类型和 handler 中没有 set，都是只读
+   */
   return new ComputedRefImpl(
     getter,
     setter,

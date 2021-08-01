@@ -15,26 +15,44 @@
 
   <script src="../dist/vue.global.js"></script>
   <script>
-    const { ref, watch, watchEffect, createApp, reactive } = Vue
+    const { computed, ref, watch, watchEffect, createApp, reactive } = Vue
+
+    const data = reactive({
+      a: 1,
+      b: 2,
+      count: 0
+    })
 
     debugger
 
+    const computedVal = computed(() => {
+      debugger
+      return data.a + data.b
+    })
+    console.log('computedVal =>', computedVal)
+    const computedVal2 = computed({
+      get: () => {
+        data.a + data.b
+      },
+      set: (value) => {
+        data.a = value
+      }
+    })
+    debugger
+    console.log('computedVal =>', computedVal2)
+
     // {_rawValue: 0, _shallow: false, __v_isRef: true, _value: 0, value: 0}
     // const refVal = ref(0)
-    // {_rawValue: {a: 1, b: 2 }, _shallow: false, __v_isRef: true, _value: {a:1, b: 2}, value: proxy}
-    const refObj = ref({
-      a: 1,
-      b: 2
-    })
 
-    console.log(refObj.value.a)
-    refObj.value = 321
-
-    // const data = reactive({
+    // // {_rawValue: {a: 1, b: 2 }, _shallow: false, __v_isRef: true, _value: {a:1, b: 2}, value: proxy}
+    // const refObj = ref({
     //   a: 1,
-    //   b: 2,
-    //   count: 0
+    //   b: 2
     // })
+
+    // console.log(refObj.value.a)
+    // refObj.value = 321
+
 
     // const arr = [1, 2]
 
@@ -61,7 +79,7 @@
     //   data.count = data.a + 1
     //   console.log('count: ', data.count)
     // })
-    
+
     // watchEffect(() => {
     //   const count2 = data.count + 1
     //   console.log('count2: ', count2)
