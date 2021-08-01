@@ -21,7 +21,9 @@ export interface WritableComputedOptions<T> {
 }
 
 class ComputedRefImpl<T> {
+  // 缓存计算的结果
   private _value!: T
+  // 是否需要重新计算
   private _dirty = true
 
   public readonly effect: ReactiveEffect<T>
@@ -34,7 +36,10 @@ class ComputedRefImpl<T> {
     private readonly _setter: ComputedSetter<T>,
     isReadonly: boolean
   ) {
-    // 这里传入的 lazy 为 true，则是惰性加载
+    /**
+     * 这里传入的 lazy 为 true，则是惰性加载
+     * 将 getter 进行封装，包装成为 reactiveEffect 函数
+     */
     this.effect = effect(getter, {
       lazy: true,
       scheduler: () => {
@@ -51,6 +56,8 @@ class ComputedRefImpl<T> {
   get value() {
     // the computed ref may get wrapped by other proxies e.g. readonly() #3376
     const self = toRaw(this)
+    // 第一次计算完成之后会将 _dirty 置为 false，并将计算完成之后的值缓存至 _value，
+    // 当计算属性内所依赖的属性没有发生变化的情况下再次获取计算属性的值时，_dirty 为 false，所以不会执行判断内的语句，而是直接 return 之前缓存的值
     if (self._dirty) {
       self._value = this.effect()
       self._dirty = false
