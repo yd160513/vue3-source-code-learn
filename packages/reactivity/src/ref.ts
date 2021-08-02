@@ -160,11 +160,17 @@ export function customRef<T>(factory: CustomRefFactory<T>): Ref<T> {
 }
 
 export function toRefs<T extends object>(object: T): ToRefs<T> {
+  // 不是一个响应式对象会有 warnning
   if (__DEV__ && !isProxy(object)) {
     console.warn(`toRefs() expects a reactive object but received a plain one.`)
   }
+  /**
+   * 如果 object 为数组则创建一个和 object length 一样的新空数组
+   * 如果 object 为对象则创建一个空对象
+   */
   const ret: any = isArray(object) ? new Array(object.length) : {}
   for (const key in object) {
+    // 将每一项转成 ref
     ret[key] = toRef(object, key)
   }
   return ret
@@ -188,8 +194,10 @@ export function toRef<T extends object, K extends keyof T>(
   object: T,
   key: K
 ): ToRef<T[K]> {
+  // 通过 object 的 __v_isRef 属性来判断是不是 ref
   return isRef(object[key])
     ? object[key]
+    // 不是 ref 则通过 ObjectRefImpl 类将 key 封装成 ref
     : (new ObjectRefImpl(object, key) as any)
 }
 
