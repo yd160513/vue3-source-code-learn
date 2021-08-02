@@ -80,7 +80,7 @@ class RefImpl<T> {
 }
 
 /**
- * ref 和 shallowRef 都会用到
+ * ref 函数和 shallowRef 函数都会调用
  * @param rawValue 
  * @param shallow 
  * @returns 

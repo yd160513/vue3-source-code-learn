@@ -17,11 +17,11 @@
   <script>
     const { computed, ref, watch, watchEffect, createApp, reactive } = Vue
 
-    const data = reactive({
-      a: 1,
-      b: 2,
-      count: 0
-    })
+    // const data = reactive({
+    //   a: 1,
+    //   b: 2,
+    //   count: 0
+    // })
 
     debugger
 
@@ -30,21 +30,22 @@
     //   return data.a + data.b
     // })
     // console.log('computedVal =>', computedVal.value)
-    const computedVal2 = computed({
-      get: () => {
-        return data.a + data.b
-      },
-      set: (value) => {
-        data.a = value
-      }
-    })
-    debugger
-    console.log('computedVal2 =>', computedVal2.value)
-    // computedVal2.value = 'hahahah'
-    console.log('第二次求值 =>', computedVal2.value)
+    // const computedVal2 = computed({
+    //   get: () => {
+    //     return data.a + data.b
+    //   },
+    //   set: (value) => {
+    //     data.a = value
+    //   }
+    // })
+    // debugger
+    // console.log('computedVal2 =>', computedVal2.value)
+    // // computedVal2.value = 'hahahah'
+    // console.log('第二次求值 =>', computedVal2.value)
 
     // {_rawValue: 0, _shallow: false, __v_isRef: true, _value: 0, value: 0}
-    // const refVal = ref(0)
+    const refVal = ref(0)
+    console.log(refVal.value)
 
     // // {_rawValue: {a: 1, b: 2 }, _shallow: false, __v_isRef: true, _value: {a:1, b: 2}, value: proxy}
     // const refObj = ref({
@@ -96,6 +97,7 @@
     // createApp({
     //   data
     // }).mount('#app')
+    debugger
   </script>
 </body>
 
