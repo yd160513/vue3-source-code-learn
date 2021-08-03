@@ -43,9 +43,20 @@ class ComputedRefImpl<T> {
     this.effect = effect(getter, {
       lazy: true,
       scheduler: () => {
-        // 不需要重新计算时
+        /**
+         * 不需要重新计算时，
+         * 加这个判断是为了解决一个问题：
+         *  当在获取 computed.value 之前多次更改 computed 中依赖的值的时候，每次更改就会触发这里的 scheduler，
+         *  第一次更改的时候就 this._dirty 为 false，会进入到判断中，将 this._dirty 赋值为 true 执行 trigger
+         *  第二次更改的时候就不需要再次触发 trigger 了，因为设置 this._dirty 为 true 的原因就是为了能够在获取 computed.value 的时候再次触发 this.effect 求值
+         *  所以当第一次更改值将 this._dirty 设置为 true，后续就不需要再重复设置这个值了，后边无论更改多少次都无所谓，后边再次获取 computed.value 的时候只要 self._dirty 为 true 就可以再次执行 this.effect 求值。
+         */
         if (!this._dirty) {
           this._dirty = true
+          /**
+           * 这里是为了通知谁？
+           *  这里是如果有依赖当前这个 computed 的就会去通知
+           */
           trigger(toRaw(this), TriggerOpTypes.SET, 'value')
         }
       }
@@ -63,6 +74,7 @@ class ComputedRefImpl<T> {
       self._value = this.effect()
       self._dirty = false
     }
+    // 收集当前 computed 的依赖，也就是谁依赖它
     track(self, TrackOpTypes.GET, 'value')
     return self._value
   }
