@@ -43,6 +43,7 @@ class ComputedRefImpl<T> {
     this.effect = effect(getter, {
       lazy: true,
       scheduler: () => {
+        // 不需要重新计算时
         if (!this._dirty) {
           this._dirty = true
           trigger(toRaw(this), TriggerOpTypes.SET, 'value')
