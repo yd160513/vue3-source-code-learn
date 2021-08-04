@@ -281,8 +281,8 @@ export function createAppAPI<HostElement>(
 
       /**
        * 将根组件进行挂载
-       * @param rootContainer 执行 mount 时传入的主容器
-       * @param isHydrate 
+       * @param rootContainer 重写的 mount 函数中调用 app.mount 函数的时候传入的 container, 这里的 container 是根容器
+       * @param isHydrate 注水，用于 SSR
        * @param isSVG 
        * @returns 
        */
@@ -293,13 +293,44 @@ export function createAppAPI<HostElement>(
       ): any {
         // 初始化流程
         if (!isMounted) {
-          // 创建一个空的 vnode
+          /**
+           * 创建一个空的 vnode
+           * vnode: {
+           *    anchor: null
+           *    children: null
+           *    appContext: null
+           *    dirs: null
+           *    component: null
+           *    dynamicProps: null
+           *    dynamicChildren: null
+           *    key: null
+           *    patchFlag: 0
+           *    props: null
+           *    ref: null
+           *    scopeId: null
+           *    shapeFlag: 4
+           *    slotScopeIds: null
+           *    ssContent: null
+           *    ssFallback: null
+           *    suspense: null
+           *    target: null
+           *    targetAnchor: null
+           *    transition: null
+           *    el: null
+           *    type: rootComponent // 调用 createVNode 的时候传入的 rootComponent
+           *    __v_isVNode: true
+           *    __v_skip: true
+           * }
+           */
           const vnode = createVNode(
             rootComponent as ConcreteComponent,
             rootProps
           )
-          // store app context on the root VNode.
-          // this will be set on the root instance on initial mount.
+          /**
+           * store app context on the root VNode.
+           * this will be set on the root instance on initial mount.
+           * context: 上边调用 createAppContext 函数的结果
+           */
           vnode.appContext = context
 
           // HMR root reload
@@ -309,16 +340,21 @@ export function createAppAPI<HostElement>(
             }
           }
 
+          /**
+           * SSR 处理
+           * hydrate 函数是调用 createAppAPI 函数传入的 hydrate
+           */
           if (isHydrate && hydrate) {
             hydrate(vnode as VNode<Node, Element>, rootContainer as any)
           } else {
             /**
              * 把传入的 vnode 转换成一个真实 DOM 并渲染至 rootContainer.
-             * 这里的 render 并不等于组建中用到的 render 函数，这里的是把 vnode 转换成真实 DOM，而组件中的渲染函数是将渲染函数转换成虚拟 DOM
+             * 这里的 render 函数是调用 createAppAPI 函数传入的 render
              */
             render(vnode, rootContainer, isSVG)
           }
           isMounted = true
+          // 根容器 #app 的所属
           app._container = rootContainer
           // for devtools and telemetry
           ;(rootContainer as any).__vue_app__ = app
@@ -372,6 +408,7 @@ export function createAppAPI<HostElement>(
       installAppCompatProperties(app, context, render)
     }
 
+    // 将 app 实例 return
     return app
   }
 }

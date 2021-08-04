@@ -532,6 +532,7 @@ function baseCreateRenderer(
           patchStaticNode(n1, n2, container, isSVG)
         }
         break
+        // 多个根节点称为 Fragment
       case Fragment:
         processFragment(
           n1,
@@ -573,7 +574,9 @@ function baseCreateRenderer(
             slotScopeIds,
             optimized
           )
-        } else if (shapeFlag & ShapeFlags.TELEPORT) {
+        } 
+        // vue3 中提供的 Teleport
+        else if (shapeFlag & ShapeFlags.TELEPORT) {
           ;(type as typeof TeleportImpl).process(
             n1 as TeleportVNode,
             n2 as TeleportVNode,
@@ -586,7 +589,9 @@ function baseCreateRenderer(
             optimized,
             internals
           )
-        } else if (__FEATURE_SUSPENSE__ && shapeFlag & ShapeFlags.SUSPENSE) {
+        } 
+        // vue3 提供的 Suspense
+        else if (__FEATURE_SUSPENSE__ && shapeFlag & ShapeFlags.SUSPENSE) {
           ;(type as typeof SuspenseImpl).process(
             n1,
             n2,
@@ -1293,6 +1298,7 @@ function baseCreateRenderer(
     }
   }
 
+  // 处理组件: 初始化的时候 component 代表调用 createApp 函数传入的对象
   const processComponent = (
     n1: VNode | null,
     n2: VNode,
@@ -1350,10 +1356,15 @@ function baseCreateRenderer(
     // mounting
     const compatMountInstance =
       __COMPAT__ && initialVNode.isCompatRoot && initialVNode.component
+    // 当前组件实例
     const instance: ComponentInternalInstance =
       compatMountInstance ||
+      /**
+       * createComponentInstance: 根据传入的参数创建对应的组件实例
+       * 当前 vnode 的 component 就是新创建的组件实例
+       */
       (initialVNode.component = createComponentInstance(
-        initialVNode,
+        initialVNode, // 新的 vnode, 对应的 n2
         parentComponent,
         parentSuspense
       ))
@@ -1373,19 +1384,24 @@ function baseCreateRenderer(
     }
 
     // resolve props and slots for setup context
+    // 解决在 setup 上下文设置 props 和 slots
     if (!(__COMPAT__ && compatMountInstance)) {
       if (__DEV__) {
         startMeasure(instance, `init`)
       }
+
       // 设置组件
       setupComponent(instance)
+      
       if (__DEV__) {
         endMeasure(instance, `init`)
       }
     }
 
-    // setup() is async. This component relies on async logic to be resolved
-    // before proceeding
+    /**
+     * setup() is async. This component relies on async logic to be resolved before proceeding
+     * 处理异步的 setup
+     */
     if (__FEATURE_SUSPENSE__ && instance.asyncDep) {
       parentSuspense && parentSuspense.registerDep(instance, setupRenderEffect)
 
@@ -2428,6 +2444,11 @@ function baseCreateRenderer(
     } 
     // 更新
     else {
+      /**
+       * container._vnode: 旧的虚拟节点
+       * vnode: 当前的虚拟节点
+       * container: DOM 容器, 如果是初始化挂载，这里就是根容器
+       */
       patch(container._vnode || null, vnode, container, null, null, null, isSVG)
     }
     flushPostFlushCbs()
@@ -2465,6 +2486,7 @@ function baseCreateRenderer(
   return {
     render,
     hydrate,
+    // createAppAPI 函数是直接 return 了一个 createApp 函数，所以这里调用后会得到 createApp 函数
     createApp: createAppAPI(render, hydrate)
   }
 }

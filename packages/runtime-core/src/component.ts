@@ -426,6 +426,7 @@ const emptyAppContext = createAppContext()
 
 let uid = 0
 
+// 根据传入的 vnode 创建对应的组件实例
 export function createComponentInstance(
   vnode: VNode,
   parent: ComponentInternalInstance | null,
@@ -549,12 +550,19 @@ export function isStatefulComponent(instance: ComponentInternalInstance) {
 
 export let isInSSRComponentSetup = false
 
+/**
+ * 初始化 props 和 slots, 并通过 setupStatefulComponent 调用 setup 函数
+ * @param instance 当前组件实例
+ * @param isSSR 
+ * @returns 
+ */
 export function setupComponent(
   instance: ComponentInternalInstance,
   isSSR = false
 ) {
   isInSSRComponentSetup = isSSR
 
+  // 当时实例的新的 vnode 
   const { props, children } = instance.vnode
   /**
    * 判断是不是状态组件（在 createApp 传入的是一个对象的时候就是状态组件，如果传入的是一个 function 则不是状态组件）
@@ -572,7 +580,7 @@ export function setupComponent(
 }
 
 /**
- * 状态组件的处理
+ * 状态组件的处理. 状态组件就是对象
  * @param instance 
  * @param isSSR 
  * @returns 
@@ -619,7 +627,9 @@ function setupStatefulComponent(
   // 2. call setup()
   const { setup } = Component
   if (setup) {
+    // 获取 setup 上下文
     const setupContext = (instance.setupContext =
+      // setup.length: 对一个 function 类型的数据来获取 length, 这里获取到的是形参的数量
       setup.length > 1 ? createSetupContext(instance) : null)
 
     currentInstance = instance
@@ -635,7 +645,8 @@ function setupStatefulComponent(
      *    ...toRefs(data)
      *  }
      * }
-     * 最终得到的是 ref 类型的 a
+     * 最终得到的 setupResult 是 ref 类型的 a。
+     * 在调用 setup 的时候会传入两个参数, 分别是 instance.props 和 setupContext
      */
     const setupResult = callWithErrorHandling(
       setup,
@@ -643,6 +654,7 @@ function setupStatefulComponent(
       ErrorCodes.SETUP_FUNCTION,
       [__DEV__ ? shallowReadonly(instance.props) : instance.props, setupContext]
     )
+    
     resetTracking()
     currentInstance = null
     
@@ -804,6 +816,7 @@ export function finishComponentSetup(
             extend(finalCompilerOptions.compatConfig, Component.compatConfig)
           }
         }
+        // 得到渲染函数
         Component.render = compile(template, finalCompilerOptions)
         if (__DEV__) {
           endMeasure(instance, `compile`)

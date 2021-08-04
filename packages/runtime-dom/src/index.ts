@@ -35,6 +35,7 @@ let enabledHydration = false
 
 // 获取渲染器实例
 function ensureRenderer() {
+  // createRenderer: 创建渲染器, 传入定的 rendererOptions 是继承自 nodeOps
   return renderer || (renderer = createRenderer<Node, Element>(rendererOptions))
 }
 
@@ -59,7 +60,26 @@ export const hydrate = ((...args) => {
 export const createApp = ((...args) => {
   /**
    * ensureRenderer 确保是一个渲染器
-   * 从渲染器中调用 createApp 函数得到 app
+   * 从渲染器中调用 createApp 函数得到 app 实例:
+   * app: {
+   *    component: function component(name, component) {},
+   *    config: {...},
+   *    directive: function directive(name, directive) {},
+   *    mixin: function mixin(mixin) {},
+   *    mount: function mount(rootContainer, isHydrate, isSVG) {},
+   *    provide: function provide(key, value) {},
+   *    unmount: function unmount() {},
+   *    use: function use(plugin, ...options) {},
+   *    version: '...',
+   *    _component: { // 调用 createApp() 时传入的对象 },
+   *    _container: null,
+   *    _context: { //... 在 createAppAPI 函数中定义的 createApp 函数中调用 createAppContext 函数的到的上下文 },
+   *    _instance: null,
+   *    _props: null,
+   *    _uid: 0,
+   *    get config: function config() {},
+   *    set config: function config(v) {}
+   * }
    */
   const app = ensureRenderer().createApp(...args)
 
@@ -74,7 +94,12 @@ export const createApp = ((...args) => {
    */
   const { mount } = app
   app.mount = (containerOrSelector: Element | ShadowRoot | string): any => {
-    // normalizeContainer 标准容器
+    /**
+     * normalizeContainer 标准容器
+     * 根据调用 mount 函数传入的选择器来获取真实的容器
+     * 例: create({ ... }).mount('#app') // 这里的 containerOrSelector 就是 #app
+     * container 为 DOM
+     */
     const container = normalizeContainer(containerOrSelector)
     if (!container) return
 
@@ -109,7 +134,7 @@ export const createApp = ((...args) => {
     // clear content before mounting
     container.innerHTML = ''
     
-    // 调用原来的 mount 函数
+    // 调用 app 实例中的 mount 函数
     const proxy = mount(container, false, container instanceof SVGElement)
     
     if (container instanceof Element) {
