@@ -444,7 +444,10 @@ function baseCreateRenderer(
   createHydrationFns: typeof createHydrationFunctions
 ): HydrationRenderer
 
-// implementation
+/**
+ * implementation
+ * 主要是定义了很多函数
+ */
 function baseCreateRenderer(
   options: RendererOptions,
   createHydrationFns?: typeof createHydrationFunctions
@@ -491,8 +494,8 @@ function baseCreateRenderer(
    * @param optimized 
    */
   const patch: PatchFn = (
-    n1, 
-    n2,
+    n1, // 旧 vnode
+    n2, // 新 vnode
     container,
     anchor = null,
     parentComponent = null,
@@ -1302,7 +1305,7 @@ function baseCreateRenderer(
     optimized: boolean
   ) => {
     n2.slotScopeIds = slotScopeIds
-    // n1 为 null 标识初始化
+    // n1 是旧 vnode，为 null 时标识为初始化
     if (n1 == null) {
       if (n2.shapeFlag & ShapeFlags.COMPONENT_KEPT_ALIVE) {
         ;(parentComponent!.ctx as KeepAliveContext).activate(
@@ -1334,7 +1337,7 @@ function baseCreateRenderer(
 
   // 初始化的挂载
   const mountComponent: MountComponentFn = (
-    initialVNode, // 初始化的vnode
+    initialVNode, // 初始化的 vnode
     container,
     anchor,
     parentComponent,
@@ -1342,7 +1345,8 @@ function baseCreateRenderer(
     isSVG,
     optimized
   ) => {
-    // 2.x compat may pre-creaate the component instance before actually
+    // 2.x compat may pre-create the component instance before actually
+    // 兼容 2.x 可以在实际运行之前预先创建组件实例
     // mounting
     const compatMountInstance =
       __COMPAT__ && initialVNode.isCompatRoot && initialVNode.component
@@ -1526,7 +1530,7 @@ function baseCreateRenderer(
           if (__DEV__) {
             startMeasure(instance, `patch`)
           }
-          // 转换之前获取的 vnode 为 DOM
+          // 递归调用 patch 转换之前获取的 vnode 为 node
           patch(
             null,
             subTree,

@@ -24,6 +24,7 @@ declare module '@vue/reactivity' {
   }
 }
 
+// 继承 nodeOps
 const rendererOptions = extend({ patchProp, forcePatchProp }, nodeOps)
 
 // lazy create the renderer - this makes core renderer logic tree-shakable
@@ -77,6 +78,10 @@ export const createApp = ((...args) => {
     const container = normalizeContainer(containerOrSelector)
     if (!container) return
 
+    /**
+     * app._component: 用户传入的根组件对象: createApp({...}) 中的对象
+     * 是在 createAppAPI 函数中进行的赋值
+     */
     const component = app._component
     // component 不是 function，没有 render，没有 template
     if (!isFunction(component) && !component.render && !component.template) {

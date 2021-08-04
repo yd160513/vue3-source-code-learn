@@ -611,6 +611,7 @@ function setupStatefulComponent(
   instance.accessCache = Object.create(null)
   // 1. create public instance / render proxy
   // also mark it raw so it's never observed
+  // 对实例上的 ctx 进行代理，未来对 ctx 操作将是响应式的
   instance.proxy = markRaw(new Proxy(instance.ctx, PublicInstanceProxyHandlers))
   if (__DEV__) {
     exposePropsOnRenderContext(instance)
@@ -623,6 +624,19 @@ function setupStatefulComponent(
 
     currentInstance = instance
     pauseTracking()
+
+    /**
+     * 调用 setup 函数
+     * setup() {
+     *  const data = reactive({
+     *    a: 1111
+     *  })
+     *  return {
+     *    ...toRefs(data)
+     *  }
+     * }
+     * 最终得到的是 ref 类型的 a
+     */
     const setupResult = callWithErrorHandling(
       setup,
       instance,
@@ -631,7 +645,9 @@ function setupStatefulComponent(
     )
     resetTracking()
     currentInstance = null
-
+    
+    // setup 函数可以返回一个 promise 类型的 setupResult
+    // 如果 setupResult 是 promise
     if (isPromise(setupResult)) {
       const unsetInstance = () => {
         currentInstance = null
@@ -657,7 +673,9 @@ function setupStatefulComponent(
             `does not support it yet.`
         )
       }
-    } else {
+    } 
+    // setupResult 不是 promise
+    else {
       handleSetupResult(instance, setupResult, isSSR)
     }
   } 
@@ -807,6 +825,7 @@ export function finishComponentSetup(
   }
 
   // support for 2.x options
+  // 单独解析 options 选项兼容之前的版本
   if (__FEATURE_OPTIONS_API__ && !(__COMPAT__ && skipOptions)) {
     currentInstance = instance
     pauseTracking()

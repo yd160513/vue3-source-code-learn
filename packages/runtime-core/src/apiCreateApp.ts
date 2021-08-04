@@ -179,7 +179,7 @@ export function createAppAPI<HostElement>(
 ): CreateAppFunction<HostElement> {
   /**
    * 创建 vue 实例函数
-   * rootComponent 用户传入的根组件对象
+   * rootComponent 用户传入的根组件对象: createApp({...}) 中的对象
    */
   return function createApp(rootComponent, rootProps = null) {
     if (rootProps != null && !isObject(rootProps)) {
