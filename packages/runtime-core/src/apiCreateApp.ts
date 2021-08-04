@@ -168,7 +168,7 @@ export type CreateAppFunction<HostElement> = (
 let uid = 0
 
 /**
- * 返回 vue 实例的创建函数
+ * 获取 vue 实例的创建函数
  * @param render
  * @param hydrate
  * @returns
@@ -177,7 +177,10 @@ export function createAppAPI<HostElement>(
   render: RootRenderFunction,
   hydrate?: RootHydrateFunction
 ): CreateAppFunction<HostElement> {
-  // rootComponent 用户传入的根组件对象
+  /**
+   * 创建 vue 实例函数
+   * rootComponent 用户传入的根组件对象
+   */
   return function createApp(rootComponent, rootProps = null) {
     if (rootProps != null && !isObject(rootProps)) {
       __DEV__ && warn(`root props passed to app.mount() must be an object.`)

@@ -56,6 +56,10 @@ export const hydrate = ((...args) => {
 
 // 创建 Vue 实例
 export const createApp = ((...args) => {
+  /**
+   * ensureRenderer 确保是一个渲染器
+   * 从渲染器中调用 createApp 函数得到 app
+   */
   const app = ensureRenderer().createApp(...args)
 
   if (__DEV__) {
@@ -69,15 +73,18 @@ export const createApp = ((...args) => {
    */
   const { mount } = app
   app.mount = (containerOrSelector: Element | ShadowRoot | string): any => {
+    // normalizeContainer 标准容器
     const container = normalizeContainer(containerOrSelector)
     if (!container) return
 
     const component = app._component
+    // component 不是 function，没有 render，没有 template
     if (!isFunction(component) && !component.render && !component.template) {
       // __UNSAFE__
       // Reason: potential execution of JS expressions in in-DOM template.
       // The user must make sure the in-DOM template is trusted. If it's
       // rendered by the server, the template should not contain any user data.
+      // 将 container 的 innerHTML 作为 template
       component.template = container.innerHTML
       // 2.x compat check
       if (__COMPAT__ && __DEV__) {
@@ -96,7 +103,10 @@ export const createApp = ((...args) => {
 
     // clear content before mounting
     container.innerHTML = ''
+    
+    // 调用原来的 mount 函数
     const proxy = mount(container, false, container instanceof SVGElement)
+    
     if (container instanceof Element) {
       container.removeAttribute('v-cloak')
       container.setAttribute('data-v-app', '')
@@ -104,6 +114,9 @@ export const createApp = ((...args) => {
     return proxy
   }
 
+  /**
+   * 这里将 app return， 则说明外部 createApp().mount() 时调用的 mount 函数就是这里的 app.mount
+   */
   return app
 }) as CreateAppFunction<Element>
 
