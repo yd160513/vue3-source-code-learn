@@ -517,6 +517,7 @@ export function createComponentInstance(
     instance.ctx = { _: instance }
   }
   instance.root = parent ? parent.root : instance
+  // bind 第一个参数为 null, 在浏览器环境下 this 指向 window, 在 node 环境下 this 指向 global
   instance.emit = emit.bind(null, instance)
 
   return instance
@@ -620,6 +621,9 @@ function setupStatefulComponent(
   // 1. create public instance / render proxy
   // also mark it raw so it's never observed
   // 对实例上的 ctx 进行代理，未来对 ctx 操作将是响应式的
+  // proxy 对象其实是代理了 instance.ctx 对象
+  // 我们在使用的时候需要使用 instance.proxy 对象
+  // 因为 instance.ctx 在 prod 和 dev 坏境下是不同的
   instance.proxy = markRaw(new Proxy(instance.ctx, PublicInstanceProxyHandlers))
   if (__DEV__) {
     exposePropsOnRenderContext(instance)
@@ -723,6 +727,12 @@ export function handleSetupResult(
     if (__DEV__ || __FEATURE_PROD_DEVTOOLS__) {
       instance.devtoolsRawSetupState = setupResult
     }
+    /**
+     * proxyRefs 的作用就是把 setupResult 对象做一层代理
+     * 方便用户直接访问 ref 类型的值
+     * 比如 setupResult 里面有个 count 是个 ref 类型的对象，用户使用的时候就可以直接使用 count 了，而不需要在 count.value
+     * 这里也就是官网里面说到的自动解构 Ref 类型
+     */
     instance.setupState = proxyRefs(setupResult)
     if (__DEV__) {
       exposeSetupStateOnRenderContext(instance)

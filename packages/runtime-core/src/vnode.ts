@@ -359,6 +359,7 @@ function _createVNode(
     // <component :is="vnode"/>
     // #2078 make sure to merge refs during the clone instead of overwriting it
     const cloned = cloneVNode(type, props, true /* mergeRef: true */)
+    // 有子节点则将子节点绑定到 cloned.children 上
     if (children) {
       normalizeChildren(cloned, children)
     }

@@ -1414,7 +1414,7 @@ function baseCreateRenderer(
       return
     }
 
-    // 渲染函数的响应式
+    // 将渲染函数创建为响应式的
     setupRenderEffect(
       instance,
       initialVNode,
@@ -1476,7 +1476,15 @@ function baseCreateRenderer(
     optimized
   ) => {
     // create reactive effect for rendering
-    instance.update = effect(function componentEffect() {
+    instance.update = effect(
+      function componentEffect() {
+      /**
+       * 组件初始化的时候会执行这里
+       * 为什么要在这里调用 render 函数呢
+       * 是因为在 effect 内调用 render 才能触发依赖收集
+       * 等到后面响应式的值变更后会再次触发这个函数
+       */
+
       // 未挂载时的初始化流程
       if (!instance.isMounted) {
         let vnodeHook: VNodeHook | null | undefined
@@ -1546,7 +1554,17 @@ function baseCreateRenderer(
           if (__DEV__) {
             startMeasure(instance, `patch`)
           }
-          // 递归调用 patch 转换之前获取的 vnode 为 node
+          // 递归调用 patch 转换之前获取的 subTree 为 node:
+          //    这里基于 subTree 再次调用 patch
+          //    这里我把这个行为隐喻成开箱
+          //    基于 render 返回的 vnode ，再次进行渲染
+          //    一个组件就是一个箱子
+          //    里面有可能是 element （也就是可以直接渲染的）
+          //    也有可能还是 component
+          //    这里就是递归的开箱
+          //    而 subTree 就是当前的这个箱子（组件）装的东西
+          //    箱子（组件）只是个概念，它实际是不需要渲染的
+          //    要渲染的是箱子里面的 subTree
           patch(
             null,
             subTree,
@@ -1606,7 +1624,9 @@ function baseCreateRenderer(
 
         // #2458: deference mount-only object parameters to prevent memleaks
         initialVNode = container = anchor = null as any
-      } else {
+      } 
+      // 更新流程
+      else {
         // updateComponent
         // This is triggered by mutation of component's own state (next: null)
         // OR parent calling processComponent (next: VNode)

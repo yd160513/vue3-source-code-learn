@@ -294,7 +294,7 @@ export function createAppAPI<HostElement>(
         // 初始化流程
         if (!isMounted) {
           /**
-           * 创建一个空的 vnode
+           * 创建一个 vnode
            * vnode: {
            *    anchor: null
            *    children: null
