@@ -20,6 +20,7 @@ function transformWithShow(template: string, options: CompilerOptions = {}) {
   return ast
 }
 
+// 根据单测来学习 v-show
 describe('compiler: v-show transform', () => {
   test('simple expression', () => {
     const ast = transformWithShow(`<div v-show="a"/>`)
