@@ -5,8 +5,10 @@ interface VShowElement extends HTMLElement {
   _vod: string
 }
 
+// 先获取到 el 中的 display 值并存到 el._vod 中，后续恢复的时候直接将 _vod 中的值赋值给 el.display
 export const vShow: ObjectDirective<VShowElement> = {
   beforeMount(el, { value }, { transition }) {
+    // 获取 el 的 display 存到 _vod 中
     el._vod = el.style.display === 'none' ? '' : el.style.display
     if (transition && value) {
       transition.beforeEnter(el)
