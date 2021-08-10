@@ -32,11 +32,14 @@ function parseWithIfTransform(
   returnIndex: number = 0,
   childrenLen: number = 1
 ) {
+  // 将模板字符串转换成 AST 抽象语法树e
   const ast = parse(template, options)
+  // 对 AST 做对应处理
   transform(ast, {
     nodeTransforms: [transformIf, transformSlotOutlet, transformElement],
     ...options
   })
+
   if (!options.onError) {
     expect(ast.children.length).toBe(childrenLen)
     for (let i = 0; i < childrenLen; i++) {

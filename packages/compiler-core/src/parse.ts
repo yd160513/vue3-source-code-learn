@@ -105,8 +105,10 @@ export function baseParse(
   content: string,
   options: ParserOptions = {}
 ): RootNode {
+  // 创建解析上下文
   const context = createParserContext(content, options)
   const start = getCursor(context)
+  // 创建 AST
   return createRoot(
     parseChildren(context, TextModes.DATA, []),
     getSelection(context, start)

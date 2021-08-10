@@ -311,12 +311,18 @@ export function createTransformContext(
   return context
 }
 
+// 对上一步的到的 AST 做对应的处理
 export function transform(root: RootNode, options: TransformOptions) {
+  // 创建 transform 上下文
   const context = createTransformContext(root, options)
+
+  // 根据第一个参数的节点类型来进行对应处理
   traverseNode(root, context)
+  // 静态节点
   if (options.hoistStatic) {
     hoistStatic(root, context)
   }
+  // 非 SSR
   if (!options.ssr) {
     createRootCodegen(root, context)
   }
@@ -413,6 +419,7 @@ export function traverseNode(
   // apply transform plugins
   const { nodeTransforms } = context
   const exitFns = []
+  // 调用 nodeTransforms 中的函数，并将返回值 push 到 exitFns 中
   for (let i = 0; i < nodeTransforms.length; i++) {
     const onExit = nodeTransforms[i](node, context)
     if (onExit) {
@@ -432,6 +439,7 @@ export function traverseNode(
   }
 
   switch (node.type) {
+    // 注释
     case NodeTypes.COMMENT:
       if (!context.ssr) {
         // inject import for the Comment symbol, which is needed for creating
@@ -439,6 +447,7 @@ export function traverseNode(
         context.helper(CREATE_COMMENT)
       }
       break
+      // 插值
     case NodeTypes.INTERPOLATION:
       // no need to traverse, but we need to inject toString helper
       if (!context.ssr) {
@@ -463,6 +472,7 @@ export function traverseNode(
   // exit transforms
   context.currentNode = node
   let i = exitFns.length
+  // 调用 exitFns 中的函数
   while (i--) {
     exitFns[i]()
   }
@@ -472,6 +482,7 @@ export function createStructuralDirectiveTransform(
   name: string | RegExp,
   fn: StructuralDirectiveTransform
 ): NodeTransform {
+  // 获取指令名称
   const matches = isString(name)
     ? (n: string) => n === name
     : (n: string) => name.test(n)
