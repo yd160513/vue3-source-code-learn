@@ -35,6 +35,7 @@ function parseWithIfTransform(
   // 将模板字符串转换成 AST 抽象语法树e
   const ast = parse(template, options)
   // 对 AST 做对应处理
+  // 优化 AST 标识静态节点
   transform(ast, {
     nodeTransforms: [transformIf, transformSlotOutlet, transformElement],
     ...options

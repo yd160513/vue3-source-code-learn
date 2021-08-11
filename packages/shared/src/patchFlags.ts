@@ -16,16 +16,24 @@
  * Check the `patchElement` function in '../../runtime-core/src/renderer.ts' to see how the
  * flags are handled during diff.
  */
+// 根据不同的 patchFlags 使用不同的 patch 方法
+/**
+ * patchFlag 分为两大类：
+ *  1. patchFlag 大于 0 时，代表所对应的元素在 patchVNode 时或 render 时是可以被优化生成或者更新的
+ *  2. patchFlag 小于 0 时，代表所对应的元素在 patchVNode 时是需要被 full diff 的，即进行递归遍历 VNode tree 的比较过程
+ */
 export const enum PatchFlags {
   /**
    * Indicates an element with dynamic textContent (children fast path)
+   * 指示具有动态 textContent（子级快速路径）的元素
    */
-  TEXT = 1,
+  TEXT = 1, // 1
 
   /**
    * Indicates an element with dynamic class binding.
+   * 标识具有动态类绑定的元素
    */
-  CLASS = 1 << 1,
+  CLASS = 1 << 1, // 2
 
   /**
    * Indicates an element with dynamic style
@@ -34,60 +42,74 @@ export const enum PatchFlags {
    * e.g. style="color: red" and :style="{ color: 'red' }" both get hoisted as
    *   const style = { color: 'red' }
    *   render() { return e('div', { style }) }
+   * 表示具有动态 style 的节点
    */
-  STYLE = 1 << 2,
+  STYLE = 1 << 2, // 4
 
   /**
    * Indicates an element that has non-class/style dynamic props.
    * Can also be on a component that has any dynamic props (includes
-   * class/style). when this flag is present, the vnode also has a dynamicProps
+   * class/style). 
+   * when this flag is present, the vnode also has a dynamicProps
    * array that contains the keys of the props that may change so the runtime
    * can diff them faster (without having to worry about removed props)
+   * 标识具有非 class/style 的动态属性的节点.
+   * 也可在组件上有动态属性包括 style/style.
+   * 当这个标志存在时，vnode 还有一个 dynamicProps 数组，其中包含可能改变的道具的键，以便运行时可以更快地区分它们（而不必担心删除的道具）
    */
-  PROPS = 1 << 3,
+  PROPS = 1 << 3, // 8
 
   /**
    * Indicates an element with props with dynamic keys. When keys change, a full
    * diff is always needed to remove the old key. This flag is mutually
    * exclusive with CLASS, STYLE and PROPS.
+   * 标识具有 props 和 动态 key 的节点。
+   * 当 key 改变，一个完整的 diff 总是需要完全的删除旧的 key。
+   * 这个 flag 和 CLASS、STYLE、PROPS 是互斥的
    */
-  FULL_PROPS = 1 << 4,
+  FULL_PROPS = 1 << 4, // 16
 
   /**
-   * Indicates an element with event listeners (which need to be attached
-   * during hydration)
+     * Indicates an element with event listeners (which need to be attached
+     * during hydration)
+   * 标识具有事件监听的节点
    */
-  HYDRATE_EVENTS = 1 << 5,
+  HYDRATE_EVENTS = 1 << 5, // 32
 
   /**
    * Indicates a fragment whose children order doesn't change.
+   * 标识一个不会改变子节点顺序的 fragment 
    */
-  STABLE_FRAGMENT = 1 << 6,
+  STABLE_FRAGMENT = 1 << 6, // 64
 
   /**
    * Indicates a fragment with keyed or partially keyed children
+   * 标识有 key 的 fragment 或者部分有 key 的子节点
    */
-  KEYED_FRAGMENT = 1 << 7,
+  KEYED_FRAGMENT = 1 << 7, // 128
 
   /**
    * Indicates a fragment with unkeyed children.
+   * 标识一个子节点没有 key 的 framgent
    */
-  UNKEYED_FRAGMENT = 1 << 8,
+  UNKEYED_FRAGMENT = 1 << 8, // 256
 
   /**
    * Indicates an element that only needs non-props patching, e.g. ref or
    * directives (onVnodeXXX hooks). since every patched vnode checks for refs
    * and onVnodeXXX hooks, it simply marks the vnode so that a parent block
    * will track it.
+   * 标识只需要非 props 比较的节点
    */
-  NEED_PATCH = 1 << 9,
+  NEED_PATCH = 1 << 9, // 512
 
   /**
    * Indicates a component with dynamic slots (e.g. slot that references a v-for
    * iterated value, or dynamic slot names).
    * Components with this flag are always force updated.
+   * 标识一个动态 slots 的组件
    */
-  DYNAMIC_SLOTS = 1 << 10,
+  DYNAMIC_SLOTS = 1 << 10, // 1024
 
   /**
    * Indicates a fragment that was created only because the user has placed
@@ -107,6 +129,7 @@ export const enum PatchFlags {
   /**
    * Indicates a hoisted static vnode. This is a hint for hydration to skip
    * the entire sub tree since static content never needs to be updated.
+   * 标识一个静态节点，静态节点从来不会更新，在优化的时候可以跳过
    */
   HOISTED = -1,
   /**
@@ -115,6 +138,7 @@ export const enum PatchFlags {
    * when encountering non-compiler generated slots (i.e. manually written
    * render functions, which should always be fully diffed)
    * OR manually cloneVNodes
+   * 指示在 diff 过程应该要退出优化模式，不是 render 函数生成的一些元素，例如 renderSlot
    */
   BAIL = -2
 }

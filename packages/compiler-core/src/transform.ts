@@ -311,7 +311,13 @@ export function createTransformContext(
   return context
 }
 
-// 对上一步的到的 AST 做对应的处理
+/**
+ * 优化 AST 标识静态节点
+ * 对所有 AST Element 新增 codegen 属性来帮助 generate 更准确的生成最优的可执行代码
+ * 对静态 AST Element 新增 hoists 属性来实现静态节点的单独创建
+ * @param root 
+ * @param options 
+ */ 
 export function transform(root: RootNode, options: TransformOptions) {
   // 创建 transform 上下文
   const context = createTransformContext(root, options)
