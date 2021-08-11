@@ -484,6 +484,7 @@ export function traverseNode(
   }
 }
 
+// 处理指令
 export function createStructuralDirectiveTransform(
   name: string | RegExp,
   fn: StructuralDirectiveTransform
@@ -494,7 +495,9 @@ export function createStructuralDirectiveTransform(
     : (n: string) => name.test(n)
 
   return (node, context) => {
+    // 这里只有是 element 节点才会做处理，因为指令只能在 element 节点上
     if (node.type === NodeTypes.ELEMENT) {
+      // 这里的 props 拿到的是所有的指令，prop 是每一个指令相关的信息
       const { props } = node
       // structural directive transforms are not concerned with slots
       // as they are handled separately in vSlot.ts
@@ -510,6 +513,7 @@ export function createStructuralDirectiveTransform(
           // traverse itself in case it moves the node around
           props.splice(i, 1)
           i--
+          // 循环指令，每个指令都来调用 fn
           const onExit = fn(node, prop, context)
           if (onExit) exitFns.push(onExit)
         }

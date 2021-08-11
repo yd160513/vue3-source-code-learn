@@ -32,7 +32,7 @@ function parseWithIfTransform(
   returnIndex: number = 0,
   childrenLen: number = 1
 ) {
-  // 将模板字符串转换成 AST 抽象语法树e
+  // 将模板字符串转换成 AST 抽象语法树
   const ast = parse(template, options)
   // 对 AST 做对应处理
   // 优化 AST 标识静态节点
