@@ -66,12 +66,15 @@ import {
 const directiveImportMap = new WeakMap<DirectiveNode, symbol>()
 
 // generate a JavaScript AST for this element's codegen
+// 为这个元素的代码生成生成一个 JavaScript AST
 export const transformElement: NodeTransform = (node, context) => {
   // perform the work on exit, after all child expressions have been
   // processed and merged.
+  // 在处理并合并所有子表达式后，在退出时执行工作。
   return function postTransformElement() {
     node = context.currentNode!
 
+    // 不是 element 不是 component 则 return
     if (
       !(
         node.type === NodeTypes.ELEMENT &&
@@ -87,10 +90,12 @@ export const transformElement: NodeTransform = (node, context) => {
 
     // The goal of the transform is to create a codegenNode implementing the
     // VNodeCall interface.
+    // 转换的目标是创建一个实现 VNodeCall 接口的 codegenNode。
     let vnodeTag = isComponent
       ? resolveComponentType(node as ComponentNode, context)
       : `"${tag}"`
 
+      // Dynamic: 动态
     const isDynamicComponent =
       isObject(vnodeTag) && vnodeTag.callee === RESOLVE_DYNAMIC_COMPONENT
 
@@ -104,6 +109,7 @@ export const transformElement: NodeTransform = (node, context) => {
 
     let shouldUseBlock =
       // dynamic component may resolve to plain elements
+      // 动态组件可以解析为普通元素
       isDynamicComponent ||
       vnodeTag === TELEPORT ||
       vnodeTag === SUSPENSE ||
@@ -117,9 +123,20 @@ export const transformElement: NodeTransform = (node, context) => {
           // #938: elements with dynamic keys should be forced into blocks
           findProp(node, 'key', true)))
 
+    // 在下边的两个判断中(node.children.length > 0 | props.length > 0)除了做对应的操作之外还都做了一个相同的操作：对 patchFlag 进行赋值      
     // props
     if (props.length > 0) {
+
+      /**
+       * {
+       *  props: propsExpression,
+       *  directives: runtimeDirectives,
+       *  patchFlag,
+       *  dynamicPropNames
+       * }
+       */
       const propsBuildResult = buildProps(node, context)
+      
       vnodeProps = propsBuildResult.props
       patchFlag = propsBuildResult.patchFlag
       dynamicPropNames = propsBuildResult.dynamicPropNames
@@ -158,6 +175,7 @@ export const transformElement: NodeTransform = (node, context) => {
       const shouldBuildAsSlots =
         isComponent &&
         // Teleport is not a real component and has dedicated runtime handling
+        // Teleport 不是真正的组件，并且具有专门的运行时处理
         vnodeTag !== TELEPORT &&
         // explained above.
         vnodeTag !== KEEP_ALIVE
