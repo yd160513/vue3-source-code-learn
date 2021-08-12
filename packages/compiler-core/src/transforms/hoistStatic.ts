@@ -22,6 +22,8 @@ export function hoistStatic(root: RootNode, context: TransformContext) {
     context,
     // Root node is unfortunately non-hoistable due to potential parent
     // fallthrough attributes.
+    // 不幸的是，由于潜在的父级失败属性，根节点是不可提升的。
+    // 是一个单一的 element
     isSingleElementRoot(root, root.children[0])
   )
 }
@@ -54,6 +56,7 @@ function walk(
   // stringficiation threshold is met.
   let canStringify = true
 
+  // 取出子节点 list
   const { children } = node
   for (let i = 0; i < children.length; i++) {
     const child = children[i]

@@ -326,10 +326,13 @@ export function transform(root: RootNode, options: TransformOptions) {
   traverseNode(root, context)
   // 静态节点
   if (options.hoistStatic) {
+    // 通过 context.hoist 函数将传入的 props/codegenNode 添加到 context.hoists 中
     hoistStatic(root, context)
   }
   // 非 SSR
   if (!options.ssr) {
+    // 给根节点的 context.helpers 增加对应的 value
+    // 对根节点增加属性 codegenNode
     createRootCodegen(root, context)
   }
   // finalize meta information
@@ -480,6 +483,7 @@ export function traverseNode(
   let i = exitFns.length
   // 调用 exitFns 中的函数
   while (i--) {
+    // 通过调用这几个函数，他们的作用都是在 node 上增加 vnodePatchFlag 字段和 context 上增加 helpers 字段
     exitFns[i]()
   }
 }
