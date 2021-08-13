@@ -118,9 +118,11 @@ function createCodegenContext(
     indentLevel: 0,
     pure: false,
     map: undefined,
+    // 获取对应的函数名称
     helper(key) {
       return `_${helperNameMap[key]}`
     },
+    // 将传入的 code 和 context.code 进行拼接，并赋值。
     push(code, node) {
       context.code += code
       if (!__BROWSER__ && context.map) {
@@ -183,13 +185,16 @@ function createCodegenContext(
   return context
 }
 
+// 将转换过的 AST 编译成可执行的 render 函数
 export function generate(
   ast: RootNode,
   options: CodegenOptions & {
     onContextCreated?: (context: CodegenContext) => void
   } = {}
 ): CodegenResult {
+  // 创建上下文
   const context = createCodegenContext(ast, options)
+
   if (options.onContextCreated) options.onContextCreated(context)
   const {
     mode,
@@ -203,6 +208,12 @@ export function generate(
   } = context
 
   const hasHelpers = ast.helpers.length > 0
+
+  /**
+   * 这里是决定代码生成采用哪种方式，有 module 和 function
+   * function 模式的特点是：使用 const { helpers... } = Vue 的方式来引入帮助函数，也就是是 createVode() createCommentVNode() 这些函数。向外导出使用 return 返回整个 render() 函数。
+   * module 模式的特点是：使用 es6 模块来导入导出函数，也就是使用 import 和 export。
+   */
   const useWithBlock = !prefixIdentifiers && mode !== 'module'
   const genScopeId = !__BROWSER__ && scopeId != null && mode === 'module'
   const isSetupInlined = !__BROWSER__ && !!options.inline
@@ -213,6 +224,8 @@ export function generate(
   const preambleContext = isSetupInlined
     ? createCodegenContext(ast, options)
     : context
+
+  // 两种不同的代码引入方式，这里引入的是谁呢，其实引入的就是在 transform 阶段添加的 helpers 字段中的所有 symbol 值
   if (!__BROWSER__ && mode === 'module') {
     genModulePreamble(ast, preambleContext, genScopeId, isSetupInlined)
   } else {
@@ -220,8 +233,10 @@ export function generate(
   }
 
   // enter render function
+  // 这里根据 SSR 区分了在渲染的时候采用 render 函数还是 ssrRender 函数，以及下边的 args
   const functionName = ssr ? `ssrRender` : `render`
   const args = ssr ? ['_ctx', '_push', '_parent', '_attrs'] : ['_ctx', '_cache']
+  
   if (!__BROWSER__ && options.bindingMetadata && !options.inline) {
     // binding optimization args
     args.push('$props', '$setup', '$data', '$options')
@@ -243,6 +258,8 @@ export function generate(
   } else {
     push(`function ${functionName}(${signature}) {`)
   }
+  
+  // 锁进
   indent()
 
   if (useWithBlock) {
@@ -257,6 +274,7 @@ export function generate(
           .join(', ')} } = _Vue`
       )
       push(`\n`)
+      // 新的一行
       newline()
     }
   }
@@ -296,6 +314,7 @@ export function generate(
     push(`return `)
   }
   if (ast.codegenNode) {
+    // 根据 node.type 对不同 node 做不同的处理，处理之后将其追加到 context.code 中。
     genNode(ast.codegenNode, context)
   } else {
     push(`null`)
@@ -322,6 +341,7 @@ export function generate(
   }
 }
 
+// 以 function 的方式引入
 function genFunctionPreamble(ast: RootNode, context: CodegenContext) {
   const {
     ssr,
@@ -380,6 +400,7 @@ function genFunctionPreamble(ast: RootNode, context: CodegenContext) {
   push(`return `)
 }
 
+// 以 module 的方式引入
 function genModulePreamble(
   ast: RootNode,
   context: CodegenContext,
@@ -482,8 +503,7 @@ function genAssets(
       id = id.slice(0, -6)
     }
     push(
-      `const ${toValidAssetId(id, type)} = ${resolver}(${JSON.stringify(id)}${
-        maybeSelfReference ? `, true` : ``
+      `const ${toValidAssetId(id, type)} = ${resolver}(${JSON.stringify(id)}${maybeSelfReference ? `, true` : ``
       })${isTS ? `!` : ``}`
     )
     if (i < assets.length - 1) {
@@ -603,7 +623,7 @@ function genNode(node: CodegenNode | symbol | string, context: CodegenContext) {
         assert(
           node.codegenNode != null,
           `Codegen node is missing for element/if/for node. ` +
-            `Apply appropriate transforms first.`
+          `Apply appropriate transforms first.`
         )
       genNode(node.codegenNode!, context)
       break
