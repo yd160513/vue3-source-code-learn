@@ -429,6 +429,7 @@ export function traverseNode(
   const { nodeTransforms } = context
   const exitFns = []
   // 调用 nodeTransforms 中的函数，并将返回值 push 到 exitFns 中
+  // 这里的 nodeTransforms 包括了所有对类型的节点的处理方法
   for (let i = 0; i < nodeTransforms.length; i++) {
     const onExit = nodeTransforms[i](node, context)
     if (onExit) {
