@@ -259,7 +259,7 @@ export function generate(
     push(`function ${functionName}(${signature}) {`)
   }
   
-  // 锁进
+  // 缩进
   indent()
 
   if (useWithBlock) {

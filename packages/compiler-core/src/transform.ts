@@ -327,6 +327,7 @@ export function transform(root: RootNode, options: TransformOptions) {
   // 静态节点
   if (options.hoistStatic) {
     // 通过 context.hoist 函数将传入的 props/codegenNode 添加到 context.hoists 中
+    // 这了添加到的是根节点的 context。
     hoistStatic(root, context)
   }
   // 非 SSR

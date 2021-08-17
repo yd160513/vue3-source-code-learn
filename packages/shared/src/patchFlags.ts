@@ -25,7 +25,7 @@
 export const enum PatchFlags {
   /**
    * Indicates an element with dynamic textContent (children fast path)
-   * 指示具有动态 textContent（子级快速路径）的元素
+   * 标识具有动态 textContent（子级快速路径）的元素
    */
   TEXT = 1, // 1
 
@@ -42,7 +42,7 @@ export const enum PatchFlags {
    * e.g. style="color: red" and :style="{ color: 'red' }" both get hoisted as
    *   const style = { color: 'red' }
    *   render() { return e('div', { style }) }
-   * 表示具有动态 style 的节点
+   * 标识具有动态 style 的节点
    */
   STYLE = 1 << 2, // 4
 
